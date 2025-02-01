@@ -26,8 +26,8 @@
 - [ ] find prof? **
 
 ## Future Work:
-[ ] Have beacons localize themselves with respect to each other (or an origin)
-[ ] 3-D localization
-[ ] Infuse each beacon with GPS coordinates
-[ ] Adapt this concept with radio waves
+- [ ] Have beacons localize themselves with respect to each other (or an origin)
+- [ ] 3-D localization
+- [ ] Infuse each beacon with GPS coordinates
+- [ ] Adapt this concept with radio waves
 
