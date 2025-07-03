@@ -1,6 +1,6 @@
 """=============================================================================
-Authors:        Alex Alves, Bradley Bravender, Noah Johnson
 Organization:   SnowScape
+Authors:        Alex Alves, Bradley Bravender, Noah Johnson
 Date Created:   July 2, 2025
 Purpose:        Simulates a novel avalanche-victim localization technology.
 Usage:          python3 simulation.py
@@ -76,9 +76,8 @@ class BaseStation():
         # anchor coordinate as (0,0). For now, we will trivially set one at (0,0).
         self.anchor0 = Device(0,0)
         self.anchor1 = Device(3,0)
-        self.anchor2 = Device(0,3)
-        # Let tag0 represent the tag of the buried skier (i.e. its position is static)
-        self.victim_tag = Device(1,1)
+        self.anchor2 = Device(-4,3)
+        self.victim_tag = Device(1,2)
         self.rescuer_tag = Device(2,2)
 
         self.calibration()
@@ -90,6 +89,10 @@ class BaseStation():
         """@Alex, this function is your baby. My thought is that it takes in a 
         list of x and y coordinates, and updates a 2D plot in real time based on 
         whenever new points are passed to the method.
+
+        Could we also add functionality so that it can detect the position of the 
+        mouse cursor as it hovers? Then we might get closer to a 'real-time' 
+        tracking of the rescuer's tag.
 
         Args:
             points (list[tuple[float, float]]): A list of the x and y coordinates
@@ -115,7 +118,9 @@ class BaseStation():
         self.a1vt = get_distance(self.anchor1, self.victim_tag)
         self.a2vt = get_distance(self.anchor2, self.victim_tag)
 
-        print(self.a0a1, self.a0a2, self.a0vt, self.a1a2, self.a1vt, self.a2vt)
+        # TODO: now port over my work from formula.py
+
+        print(f"{self.a0a1}, {self.a0a2}, {self.a0vt}, {self.a1a2}, {self.a1vt}, {self.a2vt}")
 
 
     def trilateration(self):
