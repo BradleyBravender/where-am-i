@@ -1,6 +1,6 @@
 """=============================================================================
-Organization:   SnowScape
 Authors:        Alex Alves, Bradley Bravender, Noah Johnson
+Organization:   SnowScape
 Date Created:   July 2, 2025
 Purpose:        Simulates a novel avalanche-victim localization technology.
 Usage:          python3 simulation.py
@@ -9,6 +9,9 @@ Usage:          python3 simulation.py
 import random
 from math import sqrt
 from typing import Tuple
+import numpy as np
+from scipy.optimize import differential_evolution
+import matplotlib.pyplot as plt
 
 
 class Device():
@@ -72,27 +75,13 @@ def get_distance(device1: Device, device2: Device) -> float:
 class BaseStation():
      
     def __init__(self):
-        # TODO: in the future, we need to add functionality to normalize a given
-        # anchor coordinate as (0,0). For now, we will trivially set one at (0,0).
-        self.anchor0 = Device(0,0)
-        self.anchor1 = Device(3,0)
-        self.anchor2 = Device(-4,3)
-        self.victim_tag = Device(1,2)
-        self.rescuer_tag = Device(2,2)
-
-        self.calibration()
-
-        self.trilateration()
+        self.main()
 
 
     def display_points(self, points: list[tuple[float, float]]) -> None:
         """@Alex, this function is your baby. My thought is that it takes in a 
         list of x and y coordinates, and updates a 2D plot in real time based on 
         whenever new points are passed to the method.
-
-        Could we also add functionality so that it can detect the position of the 
-        mouse cursor as it hovers? Then we might get closer to a 'real-time' 
-        tracking of the rescuer's tag.
 
         Args:
             points (list[tuple[float, float]]): A list of the x and y coordinates
@@ -101,26 +90,94 @@ class BaseStation():
         pass
 
 
-    def calibration(self):
-        """Develop the self-calibration algorithm here
+    def temporary_display_method(self, points: dict):
         """
-        # TODO:
-        # Get distances between all anchors and the victim tag
-        # Put these distances in a predefined equation
-        # Use a non-linear library to solve the equation and establish the 
-        # coordinates of each anchor and the victim tag
-        # Future work includes a more robust solution instead of just hardcoding
-        # the equations and distance function calls
-        self.a0a1 = get_distance(self.anchor0, self.anchor1)
-        self.a0a2 = get_distance(self.anchor0, self.anchor2)
-        self.a0vt = get_distance(self.anchor0, self.victim_tag)
-        self.a1a2 = get_distance(self.anchor1, self.anchor2)
-        self.a1vt = get_distance(self.anchor1, self.victim_tag)
-        self.a2vt = get_distance(self.anchor2, self.victim_tag)
+        Plots named points on a 2D graph using matplotlib.
+        
+        Parameters:
+            coord_dict (dict): Dictionary with names as keys and (x, y) tuples as values.
+        """
+        for name, (x, y) in points.items():
+            plt.scatter(x, y, label=name)
+            plt.text(x, y, name, fontsize=9, ha='right', va='bottom')
 
-        # TODO: now port over my work from formula.py
+        plt.axhline(0, color='black', linewidth=1)  # y=0 line (horizontal)
+        plt.axvline(0, color='black', linewidth=1)  # x=0 line (vertical)
 
-        print(f"{self.a0a1}, {self.a0a2}, {self.a0vt}, {self.a1a2}, {self.a1vt}, {self.a2vt}")
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.title('Named Coordinates')
+        plt.grid(True)
+        plt.legend()
+        plt.axis('equal')  # optional: equal scaling for x and y
+        plt.show()
+
+
+    def calibration_equation(self, unknowns: list[float]) -> float:
+        """A callback function used to approximate the relative coordinates of
+        each device.
+
+        Args:
+            unknowns (list[float]): A list of approximate values for each unknown
+                x and y coordinate.
+
+        Returns:
+            float: The equation to minimize for.
+        """
+        self.a1y, self.a2x, self.a2y, self.vtx, self.vty = unknowns
+        eq1 = (self.a1x - self.a0x)**2 + (self.a1y - self.a0y)**2 - self.a0a1**2 
+        eq2 = (self.a2x - self.a0x)**2 + (self.a2y - self.a0y)**2 - self.a0a2**2 
+        eq3 = (self.vtx - self.a0x)**2 + (self.vty - self.a0y)**2 - self.a0vt**2  
+        eq4 = (self.a2x - self.a1x)**2 + (self.a2y - self.a1y)**2 - self.a1a2**2
+        eq5 = (self.vtx - self.a1x)**2 + (self.vty - self.a1y)**2 - self.a1vt**2
+        eq6 = (self.vtx - self.a2x)**2 + (self.vty - self.a2y)**2 - self.a2vt**2
+        # Minimize the sum of squares of residuals
+        return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
+
+
+    def calibration(self) -> None:
+        """Uses the relative distances between devices to calculate relative
+        coordinates for each device.
+        """
+        self.a0x, self.a0y, self.a1x = 0, 0, 0
+        
+        # Retrieve the distances between each device
+        self.a0a1 = get_distance(anchor0, anchor1)
+        self.a0a2 = get_distance(anchor0, anchor2)
+        self.a0vt = get_distance(anchor0, victim_tag)
+        self.a1a2 = get_distance(anchor1, anchor2)
+        self.a1vt = get_distance(anchor1, victim_tag)
+        self.a2vt = get_distance(anchor2, victim_tag)
+
+        # Define bounds for each variable
+        bounds = [(-100, 100)] * 5
+
+        # Perform global optimization using differential evolution
+        result = differential_evolution(self.calibration_equation, bounds)
+
+        # Output result
+        if result.success:
+            a1y, a2x, a2y, vtx, vty = result.x
+            print("Solution found:")
+            print(f"({self.a0x:.3f}, {self.a0y:.3f}), ({self.a1x:.3f}, {a1y:.3f}), ({a2x:.3f}, {a2y:.3f}), ({vtx:.3f}, {vty:.3f})")
+        else:
+            print("No solution found.")
+
+    
+    def set_device_locations(self):
+        anchor0.set_coordinates(self.a0x, self.a0y)
+        anchor1.set_coordinates(self.a1x, self.a1y)
+        anchor2.set_coordinates(self.a2x, self.a2y)
+        victim_tag.set_coordinates(self.vtx, self.vty)
+
+        points = {
+            "anchor0": (self.a0x, self.a0y),
+            "anchor1": (self.a1x, self.a1y),
+            "anchor2": (self.a2x, self.a2y),
+            "victim": (self.vtx, self.vty)
+        }
+        
+        return points
 
 
     def trilateration(self):
@@ -129,16 +186,24 @@ class BaseStation():
         pass
 
 
+    def main(self):
+        self.calibration()
+
+        points = self.set_device_locations()
+
+        self.temporary_display_method(points)
+
+        self.trilateration()
+
+
 
 if __name__=="__main__":
-    # A basic test for now:
-    anchor0 = Device(0,0)
-    tag0 = Device(0,5)
-    for i in range(10):
-        print(get_distance(anchor0, tag0))
-    
-    tag0.set_coordinates(0,7)
-    for i in range(10):
-        print(get_distance(anchor0, tag0))
+    # Establish the ground truth for each device (5 total)
+    anchor0 = Device(-5,4)
+    anchor1 = Device(3,2)
+    anchor2 = Device(6,-10)
+    victim_tag = Device(4,4)
+    rescuer_tag = Device(2,2)
 
+    # Run the main program
     obj = BaseStation()
