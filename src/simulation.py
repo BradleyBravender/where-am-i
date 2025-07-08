@@ -164,7 +164,7 @@ class BaseStation():
             print("No solution found.")
 
     
-    def set_device_locations(self):
+    def set_device_locations(self) -> dict:
         anchor0.set_coordinates(self.a0x, self.a0y)
         anchor1.set_coordinates(self.a1x, self.a1y)
         anchor2.set_coordinates(self.a2x, self.a2y)
@@ -207,3 +207,7 @@ if __name__=="__main__":
 
     # Run the main program
     obj = BaseStation()
+
+# TODO: calibrate should be used for trilateration too
+
+print(variable2)
