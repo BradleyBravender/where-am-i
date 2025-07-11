@@ -136,6 +136,8 @@ class BaseStation():
         eq5 = (self.vtx - self.a1x)**2 + (self.vty - self.a1y)**2 - self.a1vt**2
         eq6 = (self.vtx - self.a2x)**2 + (self.vty - self.a2y)**2 - self.a2vt**2
         # Minimize the sum of squares of residuals
+
+        #Look into this and upload documentation on why we send in this format.
         return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
 
 
