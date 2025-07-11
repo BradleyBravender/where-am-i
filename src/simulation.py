@@ -83,10 +83,6 @@ class BaseStation():
         list of x and y coordinates, and updates a 2D plot in real time based on 
         whenever new points are passed to the method.
 
-        First make it so there are lines between every point from rescue point with distances, also normalize graph to go to the edge of points
-        Also include degrees from north of optimal path.
-        Potentially use mouse as rescue tag, calculate distances and represent the cursor as a point.
-
         Args:
             points (list[tuple[float, float]]): A list of the x and y coordinates
             of the anchors and tags.
