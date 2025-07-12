@@ -163,7 +163,7 @@ class BaseStation():
 
         # Output result
         if result.success:
-            a1y, a2x, a2y, vtx, vty = result.x
+            self.a1y, self.a2x, self.a2y, self.vtx, self.vty = result.x
             print("Solution found:")
             print(f"({self.a0x:.3f}, {self.a0y:.3f}), ({self.a1x:.3f}, {a1y:.3f}), ({a2x:.3f}, {a2y:.3f}), ({vtx:.3f}, {vty:.3f})")
         else:

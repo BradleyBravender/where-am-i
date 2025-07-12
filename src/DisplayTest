@@ -1,0 +1,50 @@
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+import random
+
+# Global variable to store real-time data
+points = []
+
+# Global variable to track mouse position
+cursor_pos = (0, 0)
+
+def mouse_move(event):
+    global cursor_pos
+    if event.xdata is not None and event.ydata is not None:
+        cursor_pos = (event.xdata, event.ydata)
+        on_mouse_move(cursor_pos)
+
+def on_mouse_move(pos):
+    """Callback when mouse moves."""
+    print(f"Mouse at: {pos}")
+
+def update_data():
+    """Simulate real-time data update (append new random points)."""
+    if len(points) > 100:
+        points.pop(0)
+    new_point = (random.uniform(0, 10), random.uniform(0, 10))
+    points.append(new_point)
+
+def animate(frame):
+    """Animation function called at each frame."""
+    update_data()
+    xs, ys = zip(*points)
+    scatter.set_offsets(np.c_[xs, ys])
+    return scatter,
+
+# Create figure and axes
+fig, ax = plt.subplots()
+ax.set_xlim(0, 10)
+ax.set_ylim(0, 10)
+
+# Initial empty scatter
+scatter = ax.scatter([], [])
+
+# Mouse motion event handler
+fig.canvas.mpl_connect('motion_notify_event', mouse_move)
+
+# Start animation
+ani = animation.FuncAnimation(fig, animate, interval=100)
+
+plt.show()
