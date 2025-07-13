@@ -31,21 +31,31 @@ class UserInterface:
         self.ax.set_ylim(0, 10)
         self.ax.grid(True)
 
-        updated_artists = []
+        updatedArtists = []
 
+        #place points on grapg
         for label, (x, y) in self.points.items():
             if x is not None and y is not None:
                 print(x,y)
                 scatter = self.ax.scatter(x, y, label=label)
                 text = self.ax.text(x + 0.1, y + 0.1, label, fontsize=9)
                 #Append the artists
-                updated_artists.append(scatter)
-                updated_artists.append(text)
-                
-        legend = self.ax.legend(loc="upper right")
-        updated_artists.append(legend)
+                updatedArtists.extend([scatter,text])
+        
+        #place lines between victim/beacon and rescuer point
+        rescuerCoords = self.points.get("rescuer", None)
+        if rescuerCoords is not None:
+            rx, ry = rescuerCoords
+            for label, (x,y) in self.points.items():
+                if label != "rescuer" and x is not None and y is not None:
+                    #grabs the element from the returned list to use as an artist in animation
+                    line = self.ax.plot([x, rx], [y, ry], color='gray', linestyle='--')[0]
+                    updatedArtists.append(line)
 
-        return updated_artists
+        legend = self.ax.legend(loc="upper right")
+        updatedArtists.append(legend)
+
+        return updatedArtists
     
     def start_animation(self):
         self.ani = animation.FuncAnimation(self.fig, self.animate, interval=100)
