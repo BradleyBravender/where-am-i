@@ -3,8 +3,6 @@ import matplotlib.animation as animation
 import numpy as np
 import random
 
-# Global variable to track mouse position
-cursor_pos = (0, 0)
 
 class UserInterface:
     
@@ -33,7 +31,7 @@ class UserInterface:
 
         updatedArtists = []
 
-        #place points on grapg
+        # place points on grapg
         for label, (x, y) in self.points.items():
             if x is not None and y is not None:
                 print(x,y)
@@ -57,6 +55,7 @@ class UserInterface:
 
         return updatedArtists
     
+
     def start_animation(self):
         self.ani = animation.FuncAnimation(self.fig, self.animate, interval=100)
 
