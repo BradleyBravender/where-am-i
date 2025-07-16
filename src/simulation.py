@@ -165,7 +165,7 @@ class BaseStation():
         if result.success:
             self.a1y, self.a2x, self.a2y, self.vtx, self.vty = result.x
             print("Solution found:")
-            print(f"({self.a0x:.3f}, {self.a0y:.3f}), ({self.a1x:.3f}, {a1y:.3f}), ({a2x:.3f}, {a2y:.3f}), ({vtx:.3f}, {vty:.3f})")
+            print(f"({self.a0x:.3f}, {self.a0y:.3f}), ({self.a1x:.3f}, {self.a1y:.3f}), ({self.a2x:.3f}, {self.a2y:.3f}), ({self.vtx:.3f}, {self.vty:.3f})")
         else:
             print("No solution found.")
 
@@ -216,4 +216,14 @@ if __name__=="__main__":
 
 # TODO: calibrate should be used for trilateration too
 
-print(variable2)
+"""
+1. set locations of all anchors and victim tag
+2. measure distances between devices, and calculate each device's coordinates based on these measurements
+3. draw and then update a plot based on the devices
+4. enter a program loop where:
+    - we take the cursor position and represent it as the rescuer
+    - we calculate the distance between this position and all of our devices
+    - we use trilateration to calculate the coordinates of the rescuer
+    - we update points based on this information
+    - we replot points
+"""
