@@ -116,7 +116,10 @@ class UserInterface:
             for label, (x,y) in self.points_to_draw.items():
                 if label != "rescuer" and x is not None and y is not None:
                     #grabs the element from the returned list to use as an artist in animation
-                    line = self.ax.plot([x, rx], [y, ry], color='gray', linestyle='--')[0]
+                    if label == 'victim':
+                        line = self.ax.plot([x, rx], [y, ry], color='red', linestyle='--')[0]
+                    else:
+                        line = self.ax.plot([x, rx], [y, ry], color='gray', linestyle='--')[0]
                     updatedArtists.append(line)
 
         legend = self.ax.legend(loc="upper right")
