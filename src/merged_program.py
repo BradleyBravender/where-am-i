@@ -144,7 +144,7 @@ def get_distance(device1: Device, device2: Device) -> float:
     """
     x = 0
     y = 1
-    error_percentage = 5
+    error_percentage = 0.5
     
     device1_coords = device1.get_gt_coordinates()
     device2_coords = device2.get_gt_coordinates()
@@ -163,22 +163,6 @@ class BaseStation():
     def __init__(self):
         self.points = {}
         self.main()
-
-
-    def display_points(self, points: list[tuple[float, float]]) -> None:
-        """@Alex, this function is your baby. My thought is that it takes in a 
-        list of x and y coordinates, and updates a 2D plot in real time based on 
-        whenever new points are passed to the method.
-
-        First make it so there are lines between every point from rescue point with distances, also normalize graph to go to the edge of points
-        Also include degrees from north of optimal path.
-        Potentially use mouse as rescue tag, calculate distances and represent the cursor as a point.
-        
-        Args:
-            points (list[tuple[float, float]]): A list of the x and y coordinates
-            of the anchors and tags.
-        """
-        pass
 
 
     def temporary_display_method(self, points: dict):
@@ -284,7 +268,44 @@ class BaseStation():
         - updates the rescuer's calculated points and adds/updates those 
             points in self.points
         """
-        self.points["rescuer"] = rescuer_tag.get_gt_coordinates()
+        # self.points["rescuer"] = rescuer_tag.get_gt_coordinates()
+        
+        a0rt = get_distance(anchor0, rescuer_tag) 
+        a1rt = get_distance(anchor1, rescuer_tag) 
+        a2rt = get_distance(anchor2, rescuer_tag) 
+
+        a0x, a0y = anchor0.get_calc_coordinates()
+        a1x, a1y = anchor1.get_calc_coordinates()
+        a2x, a2y = anchor2.get_calc_coordinates()
+
+        def trilateration_callback(unknowns):
+            rtx, rty = unknowns
+            eq1 = (a0x - rtx)**2 + (a0y - rty)**2 - a0rt**2 
+            eq2 = (a1x - rtx)**2 + (a1y - rty)**2 - a1rt**2 
+            eq3 = (a2x - rtx)**2 + (a2y - rty)**2 - a2rt**2  
+            return abs(eq1) + abs(eq2) + abs(eq3)
+
+        # Define bounds for each variable
+        bounds = [(-100, 100)] * 2
+
+        # Perform global optimization using differential evolution
+        result = differential_evolution(trilateration_callback, bounds)
+
+        # Output result
+        if result.success:
+            rtx, rty = result.x
+
+            rescuer_tag.set_calc_coordinates(rtx, rty)
+
+            # Update the internal points object
+            self.points["rescuer"] = (rtx, rty)
+            
+            print("Solution found:")
+
+            for device in self.points:
+                print(f"{device}: \t({self.points[device][0]:.3f}, {self.points[device][1]:.3f})")
+        else:
+            print("No solution found.")
 
 
     def mouse_move(self, event):
@@ -300,7 +321,6 @@ class BaseStation():
 
         self.visual_obj.update_data(self.points)
 
-     
 
     def main(self):
         # Establish the plot objects
@@ -315,6 +335,7 @@ class BaseStation():
 
         # Run the main program:
         fig.canvas.mpl_connect('motion_notify_event', self.mouse_move)
+
 
         plt.show()
     
