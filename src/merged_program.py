@@ -94,8 +94,8 @@ class UserInterface:
             #Move to distances after (have to pull from basestation)
         self.ax.clear()
         # TODO: Set axis limits (could dynamically calculate from points if needed)
-        self.ax.set_xlim(-20, 20)
-        self.ax.set_ylim(-20, 20)
+        self.ax.set_xlim(-40, 40)
+        self.ax.set_ylim(-40, 40)
         self.ax.grid(True)
 
         updatedArtists = []
@@ -144,7 +144,7 @@ def get_distance(device1: Device, device2: Device) -> float:
     """
     x = 0
     y = 1
-    error_percentage = 0.5
+    error_percentage = 0
     
     device1_coords = device1.get_gt_coordinates()
     device2_coords = device2.get_gt_coordinates()
@@ -274,9 +274,9 @@ class BaseStation():
         a1rt = get_distance(anchor1, rescuer_tag) 
         a2rt = get_distance(anchor2, rescuer_tag) 
 
-        a0x, a0y = anchor0.get_calc_coordinates()
-        a1x, a1y = anchor1.get_calc_coordinates()
-        a2x, a2y = anchor2.get_calc_coordinates()
+        a0x, a0y = anchor0.get_gt_coordinates()
+        a1x, a1y = anchor1.get_gt_coordinates()
+        a2x, a2y = anchor2.get_gt_coordinates()
 
         def trilateration_callback(unknowns):
             rtx, rty = unknowns
@@ -343,9 +343,9 @@ class BaseStation():
 
 if __name__=="__main__":
     # Establish the initial ground truth coordinates for each device (5 total)
-    anchor0 = Device(-5,4)
-    anchor1 = Device(3,2)
-    anchor2 = Device(6,-5)
+    anchor0 = Device(-20,20)
+    anchor1 = Device(18, 15)
+    anchor2 = Device(0,-19)
     victim_tag = Device(4,4)
     rescuer_tag = Device(2,2)
 
