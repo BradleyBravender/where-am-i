@@ -138,8 +138,8 @@ class UserInterface:
         #gt_rx, gt_ry = rescuer_tag.get_gt_coordinates()
         #scatter = self.ax.scatter(gt_rx, gt_ry, color='black', label='rescuerGT')
 
-        legend = self.ax.legend(loc="lower left")
-        updatedArtists.extend([legend,scatter])
+        #legend = self.ax.legend(loc="lower left")
+        updatedArtists.extend([scatter])
 
         return updatedArtists
     
